@@ -1,0 +1,7 @@
+ // next() là một hàm middleware trong Express.js
+    // Nó chuyển quyền điều khiển cho middleware tiếp theo trong chuỗi
+    // Trong trường hợp này, nó cho phép request tiếp tục sau khi xác thực token thành công
+
+    const token = authHeader && authHeader.split(' ')[1];
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => 
+   muốn xác thực jwt phải cắt ra
