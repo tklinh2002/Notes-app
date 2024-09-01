@@ -2,7 +2,11 @@ import express from "express";
 const router = express.Router();
 import Note from "../models/note.model.js";
 import { authenticateToken } from "../utils/utillities.js";
+import { createClient } from 'redis';
+import config from '../../config.js';
+const redisClient = createClient(config.redis);
 
+redisClient.connect().catch(console.error);
 /**
  * @swagger
  * tags:
@@ -129,6 +133,31 @@ router.route("/:id").get(authenticateToken, (req, res) => {
       res.json(note);
     })
     .catch((err) => res.status(400).json("Error: " + err));
+});
+router.get('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Check cache first
+    const cachedNote = await redisClient.get(`note:${id}`);
+    if (cachedNote) {
+      return res.json(JSON.parse(cachedNote));
+    }
+
+    // If not in cache, fetch from database
+    const note = await Note.findById(id);
+    if (!note) {
+      return res.status(404).json({ message: 'Note not found' });
+    }
+
+    // Cache the result
+    await redisClient.set(`note:${id}`, JSON.stringify(note), {
+      EX: 3600, // Expire after 1 hour
+    });
+
+    res.json(note);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching note', error: error.message });
+  }
 });
 
 /**
