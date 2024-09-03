@@ -1,15 +1,17 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import Navbar from "../../components/Navbar/Navbar";
 import { InfoLogin } from "../../types/typeInfo";
 import { useState } from "react";
 import { validateEmail } from "../../utils/helper";
+import { login } from "../../api/auth.api";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "../../features/authSlice";
 const Login = () => {
+  const dispatch = useDispatch();
   const [info, setInfo] = useState<InfoLogin>({
     email: "",
     password: "",
   });
   const [error, setError] = useState<string>("");
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (info.email === "" || info.password === "") {
       setError("Please fill all the fields");
@@ -19,12 +21,23 @@ const Login = () => {
       setError("Please enter a valid email");
       return;
     } 
-    setError("");
     // login api 
+    try {
+      const response = await login(info.email, info.password);
+      console.log(response);
+      if (response.status === 200) {
+        dispatch(setCredentials(response.data.token));
+        setError("");
+        window.location.href = "/";
+
+      }
+    } catch (error) {
+      console.log(error);
+      setError("Invalid email or password");
+    } 
   };
   return (
     <div>
-      <Navbar />
       <div className="flex justify-center items-center h-screen">
         <div className="w-full max-w-md">
           <form

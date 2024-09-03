@@ -5,7 +5,7 @@ import { MdOutlineEdit } from "react-icons/md";
 const NoteCard = ({
   title,
   content,
-  date,
+  createdAt,
   tags,
   isPinned,
   onDelete,
@@ -20,7 +20,7 @@ const NoteCard = ({
           <GiPin size={25} color={isPinned ? "blue" : "gray"} />
         </button>
       </div>
-      <p className="text-sm text-gray-500">{date}</p>
+      <p className="text-sm text-gray-500">{createdAt}</p>
       <p className="text-sm text-gray-500">{content}</p>
       <div className="flex justify-between">
         <p className="text-sm text-gray-500">

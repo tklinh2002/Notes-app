@@ -1,6 +1,7 @@
 import { useState } from "react";
-import Navbar from "../../components/Navbar/Navbar";
 import { InfoSignUp } from "../../types/typeInfo";
+import { useDispatch } from "react-redux";
+import { signup } from "../../api/auth.api";
 
 const SignUp = () => {
   const [info, setInfo] = useState<InfoSignUp>({
@@ -10,7 +11,7 @@ const SignUp = () => {
     rePassword: "",
   });
   const [error, setError] = useState<string>("");
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     // sign up api
     if (info.password !== info.rePassword) {
@@ -19,10 +20,19 @@ const SignUp = () => {
     }
     setError("");
     console.log(info);
+    try {
+      const response = await signup(info.fullName, info.email, info.password);
+      if (response.status === 200) {
+        window.location.href = "/";
+      }
+      setError(response.data.message);
+    } catch (error) {
+      console.log(error);
+      setError("Invalid email or password");
+    }
   };
   return (
     <div>
-      <Navbar />
       <div className="flex justify-center items-center h-screen">
         <div className="w-full max-w-md">
           <form
@@ -91,10 +101,14 @@ const SignUp = () => {
                 type="password"
                 placeholder="******************"
                 value={info.rePassword}
-                onChange={(e) => setInfo({ ...info, rePassword: e.target.value })}
+                onChange={(e) =>
+                  setInfo({ ...info, rePassword: e.target.value })
+                }
               />
             </div>
-            {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
+            {error && (
+              <p className="text-red-500 text-sm text-center mb-4">{error}</p>
+            )}
             <button className="btn-primary" type="button">
               Sign Up
             </button>
